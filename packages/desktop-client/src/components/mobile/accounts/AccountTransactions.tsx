@@ -64,6 +64,7 @@ function TransactionListWithPreviews({
   );
 
   const [showRunningBalances] = useSyncedPref(`show-balances-${account.id}`);
+  const [hideReconciled] = useSyncedPref(`hide-reconciled-${account.id}`);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
@@ -208,10 +209,13 @@ function TransactionListWithPreviews({
     [account],
   );
 
-  const transactionsToDisplay = !isSearching
-    ? // Do not render child transactions in the list, unless searching
-      previewTransactions.concat(transactions.filter(t => !t.is_child))
-    : transactions;
+  const transactionsToDisplay = (() => {
+    const base = !isSearching
+      ? // Do not render child transactions in the list, unless searching
+        previewTransactions.concat(transactions.filter(t => !t.is_child))
+      : transactions;
+    return hideReconciled === 'true' ? base.filter(t => !t.reconciled) : base;
+  })();
 
   return (
     <TransactionListWithBalances

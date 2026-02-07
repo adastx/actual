@@ -49,6 +49,7 @@ export function AccountMenuModal({
   onEditNotes,
   onClose,
   onToggleRunningBalance,
+  onToggleReconciled,
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
@@ -127,6 +128,7 @@ export function AccountMenuModal({
                 onClose={onCloseAccount}
                 onReopen={onReopenAccount}
                 onToggleRunningBalance={onToggleRunningBalance}
+                onToggleReconciled={onToggleReconciled}
               />
             }
             title={
@@ -205,6 +207,7 @@ type AdditionalAccountMenuProps = {
   onClose?: (accountId: string) => void;
   onReopen?: (accountId: string) => void;
   onToggleRunningBalance?: () => void;
+  onToggleReconciled?: () => void;
 };
 
 function AdditionalAccountMenu({
@@ -212,6 +215,7 @@ function AdditionalAccountMenu({
   onClose,
   onReopen,
   onToggleRunningBalance,
+  onToggleReconciled,
 }: AdditionalAccountMenuProps) {
   const { t } = useTranslation();
   const triggerRef = useRef(null);
@@ -226,6 +230,7 @@ function AdditionalAccountMenu({
     ...(item.name === 'close' && { color: theme.errorTextMenu }),
   });
   const [showBalances] = useSyncedPref(`show-balances-${account.id}`);
+  const [hideReconciled] = useSyncedPref(`hide-reconciled-${account.id}`);
 
   return (
     <View>
@@ -258,6 +263,13 @@ function AdditionalAccountMenu({
                     ? t('Hide running balance')
                     : t('Show running balance'),
               },
+              {
+                name: 'toggle-reconciled',
+                text:
+                  hideReconciled !== 'true'
+                    ? t('Hide reconciled transactions')
+                    : t('Show reconciled transactions'),
+              },
               account.closed
                 ? {
                     name: 'reopen',
@@ -283,6 +295,9 @@ function AdditionalAccountMenu({
                   break;
                 case 'balance':
                   onToggleRunningBalance?.();
+                  break;
+                case 'toggle-reconciled':
+                  onToggleReconciled?.();
                   break;
                 default:
                   throw new Error(`Unrecognized menu option: ${name}`);
